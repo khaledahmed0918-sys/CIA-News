@@ -18,8 +18,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      if (mobile) setIsSidebarOpen(false);
-      else setIsSidebarOpen(true);
+      // Removed: if (mobile) setIsSidebarOpen(false);
+      // Removed: else setIsSidebarOpen(true);
     };
 
     checkMobile();
@@ -33,9 +33,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-[#0a0f1c] text-white font-sans selection:bg-blue-500/30 selection:text-blue-100">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none transform-gpu">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] transform-gpu" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] transform-gpu" />
-        <div className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[80px] transform-gpu" />
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px] transform-gpu" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] transform-gpu" />
+        <div className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-cyan-400/10 rounded-full blur-[80px] transform-gpu" />
       </div>
 
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />

@@ -13,7 +13,7 @@ export const wantedData: WantedPerson[] = [
   {
     id: 'chimon',
     name: 'تشايمون',
-    image: 'https://i.postimg.cc/1zh8GfsC/cb2e6db1a96a9214.jpg'
+    image: 'https://i.postimg.cc/sX2SwzjF/f740cb722faefb26.jpg'
   },
   {
     id: 'vandamme',

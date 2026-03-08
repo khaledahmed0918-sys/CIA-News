@@ -80,7 +80,7 @@ export const Home: React.FC = () => {
         <div className="relative z-10 flex flex-col items-center text-center w-full">
           {/* Logo Image */}
           <motion.img
-            src="https://i.postimg.cc/QdnfpfkC/received-858179620603677.jpg"
+            src="https://i.postimg.cc/d18NsWjp/IMG-9068.jpg"
             alt="CIA News Logo"
             className="w-32 h-32 md:w-48 md:h-48 rounded-full mb-6 object-cover shadow-[0_0_30px_rgba(59,130,246,0.5)] border-2 border-blue-500/30"
             animate={{ 
