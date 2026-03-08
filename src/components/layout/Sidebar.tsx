@@ -57,13 +57,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed top-0 right-0 h-screen z-50 flex flex-col border-l border-white/10 bg-[#0f172a]/90 backdrop-blur-xl shadow-2xl overflow-hidden",
+          "fixed top-0 right-0 h-screen z-[100] flex flex-col border-l border-white/10 bg-[#0f172a]/95 backdrop-blur-xl shadow-2xl overflow-hidden",
           // Right-to-left layout for Arabic
           "rtl:left-auto rtl:right-0 ltr:right-auto ltr:left-0"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
           <AnimatePresence mode="wait">
             {isOpen && (
               <motion.div
@@ -72,8 +72,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
                 exit={{ opacity: 0, x: 20 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-400/30">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Seal_of_the_Central_Intelligence_Agency.svg/1200px-Seal_of_the_Central_Intelligence_Agency.svg.png" alt="CIA Logo" className="w-8 h-8 object-contain" />
+                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-400/30 overflow-hidden">
+                  <img src="https://i.postimg.cc/d18NsWjp/IMG-9068.jpg" alt="CIA Logo" className="w-full h-full object-cover" />
                 </div>
                 <h1 className="text-xl font-bold text-blue-100 tracking-wider font-mono">CIA News</h1>
               </motion.div>

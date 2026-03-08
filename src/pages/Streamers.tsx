@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useStreamerData, Streamer } from '@/hooks/useStreamerData';
+import { useStreamerData } from '@/hooks/useStreamerData';
+import type { Channel } from '@/types';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Search, Wifi, WifiOff, Twitter, Instagram, Youtube, Disc as Discord, Users, Clock } from 'lucide-react';
@@ -13,7 +14,7 @@ export const Streamers: React.FC = () => {
   const filteredStreamers = useMemo(() => {
     return streamers.filter(s => 
       s.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.title.toLowerCase().includes(searchQuery.toLowerCase())
+      (s.live_title && s.live_title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [streamers, searchQuery]);
 
@@ -63,7 +64,7 @@ export const Streamers: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredStreamers.map((streamer) => (
-            <StreamerCard key={streamer.slug} streamer={streamer} />
+            <StreamerCard key={streamer.username} streamer={streamer} />
           ))}
           
           {filteredStreamers.length === 0 && (
@@ -77,13 +78,13 @@ export const Streamers: React.FC = () => {
   );
 };
 
-const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
+const StreamerCard: React.FC<{ streamer: Channel }> = ({ streamer }) => {
   return (
     <GlassCard className="p-0 overflow-hidden flex flex-col h-full group hover:shadow-blue-500/10 transition-all duration-500 border-white/5">
       {/* Banner */}
       <div className="h-32 w-full relative overflow-hidden">
         <img 
-          src={streamer.banner} 
+          src={streamer.banner_image || 'https://picsum.photos/seed/cia/800/200'} 
           alt={`${streamer.username} banner`} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
@@ -92,7 +93,7 @@ const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
         
         {/* Live Status Badge */}
         <div className="absolute top-3 left-3">
-          {streamer.isLive ? (
+          {streamer.is_live ? (
             <div className="flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]">
               <Wifi size={14} />
               LIVE
@@ -110,9 +111,9 @@ const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
       <div className="p-5 flex-1 flex flex-col relative">
         {/* Avatar */}
         <div className="absolute -top-12 right-5">
-          <div className={`p-1 rounded-full ${streamer.isLive ? 'bg-red-500 animate-pulse' : 'bg-[#0f172a] border border-white/10'}`}>
+          <div className={`p-1 rounded-full ${streamer.is_live ? 'bg-red-500 animate-pulse' : 'bg-[#0f172a] border border-white/10'}`}>
             <img 
-              src={streamer.avatar || `https://ui-avatars.com/api/?name=${streamer.username}&background=random`} 
+              src={streamer.profile_pic || `https://ui-avatars.com/api/?name=${streamer.username}&background=random`} 
               alt={streamer.username} 
               className="w-20 h-20 rounded-full object-cover border-4 border-[#0f172a] shadow-xl"
               loading="lazy"
@@ -123,10 +124,10 @@ const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
         {/* Header Info */}
         <div className="mt-10 mb-4">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            {streamer.username}
-            {streamer.isLive && <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />}
+            {streamer.display_name}
+            {streamer.is_live && <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />}
           </h3>
-          <p className="text-blue-400/70 text-sm font-mono">@{streamer.slug}</p>
+          <p className="text-blue-400/70 text-sm font-mono">@{streamer.username}</p>
         </div>
 
         {/* Stats */}
@@ -134,17 +135,19 @@ const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
           <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5">
             <div className="text-xs text-blue-300/50 mb-1">المتابعون</div>
             <div className="font-mono font-bold text-blue-100">
-              {new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(streamer.followersCount)}
+              {new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(streamer.followers_count || 0)}
             </div>
           </div>
           <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5">
-            <div className="text-xs text-blue-300/50 mb-1">{streamer.isLive ? 'المشاهدون' : 'آخر بث'}</div>
+            <div className="text-xs text-blue-300/50 mb-1">{streamer.is_live ? 'المشاهدون' : 'آخر بث'}</div>
             <div className="font-mono font-bold text-blue-100 text-xs flex items-center justify-center h-full">
-              {streamer.isLive ? (
-                <span className="text-red-400">{streamer.viewers.toLocaleString()}</span>
+              {streamer.is_live ? (
+                <span className="text-red-400">{streamer.viewer_count?.toLocaleString()}</span>
               ) : (
                 <span className="text-[10px] opacity-70">
-                  {formatDistanceToNow(new Date(streamer.lastStream), { addSuffix: true, locale: ar })}
+                  {streamer.last_stream_start_time 
+                    ? formatDistanceToNow(new Date(streamer.last_stream_start_time), { addSuffix: true, locale: ar })
+                    : 'غير متوفر'}
                 </span>
               )}
             </div>
@@ -154,34 +157,34 @@ const StreamerCard: React.FC<{ streamer: Streamer }> = ({ streamer }) => {
         {/* Stream Info */}
         <div className="bg-blue-500/5 rounded-xl p-3 mb-4 border border-blue-500/10">
           <div className="text-xs text-blue-400 mb-1 font-bold uppercase tracking-wider">
-            {streamer.isLive ? 'يبث الآن' : 'آخر عنوان'}
+            {streamer.is_live ? 'يبث الآن' : 'آخر عنوان'}
           </div>
-          <p className="text-sm text-blue-100 line-clamp-2 leading-relaxed" title={streamer.title}>
-            {streamer.title}
+          <p className="text-sm text-blue-100 line-clamp-2 leading-relaxed" title={streamer.live_title || ''}>
+            {streamer.live_title || streamer.bio || 'لا يوجد عنوان'}
           </p>
           <div className="mt-2 flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/20">
-              {streamer.category}
+              {streamer.live_category || 'General'}
             </span>
           </div>
         </div>
 
         {/* Socials */}
         <div className="mt-auto pt-4 border-t border-white/5 flex gap-2 justify-end">
-          {streamer.socials.twitter && (
-            <SocialIcon href={streamer.socials.twitter} icon={Twitter} color="hover:text-blue-400" />
+          {streamer.social_links.twitter && (
+            <SocialIcon href={streamer.social_links.twitter} icon={Twitter} color="hover:text-blue-400" />
           )}
-          {streamer.socials.instagram && (
-            <SocialIcon href={streamer.socials.instagram} icon={Instagram} color="hover:text-pink-500" />
+          {streamer.social_links.instagram && (
+            <SocialIcon href={streamer.social_links.instagram} icon={Instagram} color="hover:text-pink-500" />
           )}
-          {streamer.socials.youtube && (
-            <SocialIcon href={streamer.socials.youtube} icon={Youtube} color="hover:text-red-500" />
+          {streamer.social_links.youtube && (
+            <SocialIcon href={streamer.social_links.youtube} icon={Youtube} color="hover:text-red-500" />
           )}
-          {streamer.socials.discord && (
-            <SocialIcon href={streamer.socials.discord} icon={Discord} color="hover:text-indigo-400" />
+          {streamer.social_links.discord && (
+            <SocialIcon href={streamer.social_links.discord} icon={Discord} color="hover:text-indigo-400" />
           )}
            <a 
-            href={`https://kick.com/${streamer.slug}`} 
+            href={`https://kick.com/${streamer.username}`} 
             target="_blank" 
             rel="noopener noreferrer"
             className="ml-auto bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"

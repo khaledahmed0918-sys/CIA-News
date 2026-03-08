@@ -22,18 +22,18 @@ export const Characters: React.FC = () => {
     <div className="space-y-8">
       <h2 className="text-3xl font-bold text-blue-100 mb-8 border-b border-white/10 pb-4">معرض الصور</h2>
       
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {uniqueImages.map((img, idx) => (
-          <div key={idx} className="break-inside-avoid">
-            <GlassCard className="p-2 group overflow-hidden">
+          <div key={idx} className="h-full">
+            <GlassCard className="p-2 group overflow-hidden h-full">
               <div 
-                className="relative overflow-hidden rounded-xl cursor-pointer"
+                className="relative overflow-hidden rounded-xl cursor-pointer h-64 md:h-80"
                 onClick={() => setSelectedImage(img.src)}
               >
                 <img 
                   src={img.src} 
                   alt={img.title} 
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
                 />
                 

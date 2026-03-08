@@ -41,7 +41,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <motion.main
         layout
-        className="relative z-10 flex flex-col min-h-screen transition-all duration-300 ease-in-out"
+        className="relative z-10 flex flex-col min-h-screen transition-all duration-300 ease-in-out will-change-transform"
         style={{ 
           marginRight: isMobile ? 0 : (isSidebarOpen ? 280 : 80),
           marginLeft: 0 // RTL layout
@@ -51,10 +51,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="w-full"
             >
               {children}
