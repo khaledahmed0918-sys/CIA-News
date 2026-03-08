@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CIA News</title>
+    <script>
+      // Force a hard refresh to ensure the latest version is loaded
+      const APP_VERSION = '1.0.2'; // Increment this to force a refresh
+      if (localStorage.getItem('app_version') !== APP_VERSION) {
+        localStorage.setItem('app_version', APP_VERSION);
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', APP_VERSION);
+        window.location.replace(url.toString());
+      }
+    </script>
     <meta name="description" content="CIA News - The official news portal for the Central Intelligence Agency community." />
     <meta name="theme-color" content="#0f172a" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

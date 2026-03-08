@@ -11,7 +11,7 @@ const DiscordIcon = ({ size = 24, className = "" }) => (
 export const Footer: React.FC = () => {
   const copyDiscord = () => {
     navigator.clipboard.writeText('221.k');
-    alert('تم نسخ يوزر الديسكورد: 221.k');
+    console.log('تم نسخ يوزر الديسكورد: 221.k');
   };
 
   return (
