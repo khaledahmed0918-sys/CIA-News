@@ -131,7 +131,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
 
   // If no data found after all proxies
   if (!data || !data.user) {
-      return getSafeChannelObj(originalUsername, false);
+      return getSafeChannelObj(originalUsername, true);
   }
 
   // 2. Process Data
@@ -232,7 +232,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
       };
 
   } catch (error) {
-      return getSafeChannelObj(originalUsername, false);
+      return getSafeChannelObj(originalUsername, true);
   }
 };
 

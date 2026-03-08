@@ -15,6 +15,27 @@ interface Analysis {
   characters?: string;
 }
 
+const ImageWithLoader = ({ src, alt, onClick }: { src: string, alt: string, onClick?: () => void }) => {
+  const [loaded, setLoaded] = useState(false);
+  
+  return (
+    <div className="w-full h-64 md:h-96 relative cursor-pointer group overflow-hidden" onClick={onClick}>
+      <img 
+        src={src} 
+        alt={alt} 
+        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm z-10">
+          <Loader2 className="animate-spin text-blue-500" size={32} />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const Analytics: React.FC = () => {
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -117,21 +138,11 @@ export const Analytics: React.FC = () => {
           {analyses.map((item) => (
             <GlassCard key={item.id} className="p-0 overflow-hidden flex flex-col">
               {item.image_url && (
-                <div className="w-full h-64 md:h-96 relative cursor-pointer group overflow-hidden" onClick={() => setSelectedImage(item.image_url)}>
-                  <img 
-                    src={item.image_url} 
-                    alt={item.person_name} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                    loading="lazy"
-                    onLoad={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.parentElement?.querySelector('.image-loader')?.remove();
-                    }}
-                  />
-                  <div className="image-loader absolute inset-0 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm z-10">
-                    <Loader2 className="animate-spin text-blue-500" size={32} />
-                  </div>
-                </div>
+                <ImageWithLoader 
+                  src={item.image_url} 
+                  alt={item.person_name} 
+                  onClick={() => setSelectedImage(item.image_url)} 
+                />
               )}
               <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-blue-200 mb-4">{item.characters || item.person_name}</h3>

@@ -27,7 +27,7 @@ export const StreamerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         username,
         display_name: username,
         is_live: false,
-        error: false,
+        error: true,
         isLoading: false,
         profile_pic: '',
         live_url: `https://kick.com/${username}`,
