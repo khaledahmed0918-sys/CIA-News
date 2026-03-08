@@ -29,9 +29,10 @@ export const Characters: React.FC = () => {
   const fetchCharacters = async () => {
     try {
       const response = await axios.get('/api/characters');
-      setCharacters(response.data);
+      setCharacters(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Failed to fetch characters', error);
+      setCharacters([]);
     }
   };
 
