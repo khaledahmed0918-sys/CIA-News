@@ -59,17 +59,17 @@ export const Analytics: React.FC = () => {
 
   const handleAdd = async () => {
     if (!formData.person_name || !formData.characters || !formData.message) {
-      alert('يرجى تعبئة جميع الحقول المطلوبة');
+      console.error('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
     
     if (formData.image_source === 'link' && !formData.image_url) {
-      alert('يرجى إدخال رابط الصورة');
+      console.error('يرجى إدخال رابط الصورة');
       return;
     }
     
     if (formData.image_source === 'upload' && !formData.file) {
-      alert('يرجى اختيار صورة');
+      console.error('يرجى اختيار صورة');
       return;
     }
 
@@ -96,7 +96,6 @@ export const Analytics: React.FC = () => {
       setFormData({ person_name: '', characters: '', message: '', image_source: 'link', image_url: '', file: null });
     } catch (error: any) {
       console.error('Upload failed', error);
-      alert(error.message || 'حدث خطأ أثناء الإضافة. يرجى المحاولة مرة أخرى.');
     } finally {
       setIsUploading(false);
     }

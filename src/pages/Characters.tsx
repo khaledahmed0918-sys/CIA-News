@@ -43,7 +43,7 @@ export const Characters: React.FC = () => {
 
   const handleAdd = async () => {
     if (!formData.person_name || !formData.character_name) {
-      alert('يرجى تعبئة جميع الحقول المطلوبة');
+      console.error('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
     setIsUploading(true);
@@ -79,7 +79,6 @@ export const Characters: React.FC = () => {
       setFormData({ person_name: '', character_name: '', image_source: 'link', image_url: '', files: [] });
     } catch (error: any) {
       console.error('Upload failed', error);
-      alert(error.message || 'حدث خطأ أثناء الإضافة. يرجى المحاولة مرة أخرى.');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
