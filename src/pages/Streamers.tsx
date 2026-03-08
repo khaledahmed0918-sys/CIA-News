@@ -7,6 +7,14 @@ import { Search, Wifi, WifiOff, Twitter, Instagram, Youtube, Disc as Discord, Us
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
+const isValidSocialLink = (link: string | undefined) => {
+  if (!link) return false;
+  const trimmed = link.trim();
+  if (trimmed === '') return false;
+  if (trimmed.toLowerCase() === 'null' || trimmed.toLowerCase() === 'undefined') return false;
+  return true;
+};
+
 export const Streamers: React.FC = () => {
   const { streamers, loading, retryStreamer } = useStreamerData();
   const [searchQuery, setSearchQuery] = useState('');
@@ -144,7 +152,6 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
           src={streamer.banner_image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} 
           alt={`${streamer.username} banner`} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0f172a]/90" />
         
@@ -173,7 +180,6 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
               src={streamer.profile_pic || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} 
               alt={streamer.username} 
               className="w-24 h-24 rounded-full object-cover border-4 border-[#0f172a] shadow-xl"
-              loading="lazy"
             />
           </div>
         </div>
@@ -214,10 +220,10 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
         {/* Stream Info */}
         <div className="bg-blue-500/5 rounded-xl p-3 mb-4 border border-blue-500/10">
           <div className="text-xs text-blue-400 mb-1 font-bold uppercase tracking-wider">
-            {streamer.is_live ? 'يبث الآن' : 'آخر عنوان'}
+            {streamer.is_live ? 'يبث الآن' : 'النبذة/البايو'}
           </div>
           <p className="text-sm text-blue-100 line-clamp-2 leading-relaxed" title={streamer.live_title || ''}>
-            {streamer.live_title || streamer.bio || 'لا يوجد عنوان'}
+            {streamer.live_title || streamer.bio || 'لا يوجد نبذة/بايو'}
           </p>
           <div className="mt-2 flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/20">
@@ -228,19 +234,19 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
 
         {/* Socials */}
         <div className="mt-auto pt-4 border-t border-white/5 flex gap-2 justify-end flex-wrap">
-          {streamer.social_links.twitter && (
+          {isValidSocialLink(streamer.social_links.twitter) && (
             <SocialIcon href={streamer.social_links.twitter} icon={Twitter} className="text-blue-400 bg-blue-500/10 hover:bg-blue-500/20" />
           )}
-          {streamer.social_links.instagram && (
+          {isValidSocialLink(streamer.social_links.instagram) && (
             <SocialIcon href={streamer.social_links.instagram} icon={Instagram} className="text-pink-400 bg-pink-500/10 hover:bg-pink-500/20" />
           )}
-          {streamer.social_links.youtube && (
+          {isValidSocialLink(streamer.social_links.youtube) && (
             <SocialIcon href={streamer.social_links.youtube} icon={Youtube} className="text-red-400 bg-red-500/10 hover:bg-red-500/20" />
           )}
-          {streamer.social_links.discord && (
+          {isValidSocialLink(streamer.social_links.discord) && (
             <SocialIcon href={streamer.social_links.discord} icon={Discord} className="text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20" />
           )}
-          {streamer.social_links.tiktok && (
+          {isValidSocialLink(streamer.social_links.tiktok) && (
             <SocialIcon href={streamer.social_links.tiktok} icon={({size, className}) => (
                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
             )} className="text-pink-400 bg-pink-500/10 hover:bg-pink-500/20" />

@@ -172,8 +172,13 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
       
       // Helper to format social links correctly
       const formatSocialLink = (platform: string, handle: string) => {
-          if (!handle || handle.trim() === '') return null;
+          if (!handle || typeof handle !== 'string') return null;
           handle = handle.trim();
+          if (handle === '') return null;
+          
+          const lowerHandle = handle.toLowerCase();
+          if (lowerHandle === 'null' || lowerHandle === 'undefined' || lowerHandle === 'none' || lowerHandle === 'false') return null;
+
           if (handle.startsWith('http')) return handle;
           
           switch(platform) {
