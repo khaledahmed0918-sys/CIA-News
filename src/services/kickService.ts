@@ -31,14 +31,22 @@ export const extractUsername = (input: string): string => {
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Helper to fetch with timeout
+ * Helper to fetch with timeout and abort signal
  */
 const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 8000): Promise<Response> => {
+    const { signal, ...fetchOptions } = options;
     const controller = new AbortController();
+    
+    // If an external signal is provided, listen to it
+    if (signal) {
+        signal.addEventListener('abort', () => controller.abort());
+    }
+
     const id = setTimeout(() => controller.abort(), timeout);
+    
     try {
         const response = await fetch(url, { 
-            ...options, 
+            ...fetchOptions, 
             signal: controller.signal,
             // Try to avoid sending referrer to keep traffic looking cleaner to the proxy
             referrerPolicy: 'no-referrer' 
@@ -78,7 +86,7 @@ const getSafeChannelObj = (username: string, error = false): Channel => ({
 /**
  * Fetches data for a single Kick channel using multi-proxy rotation.
  */
-export const fetchKickChannel = async (originalUsername: string, retryCount = 0): Promise<Channel> => {
+export const fetchKickChannel = async (originalUsername: string, retryCount = 0, signal?: AbortSignal): Promise<Channel> => {
   const timestamp = Date.now();
   // We append a timestamp to the Kick URL to prevent the Proxy from returning cached stale data
   const targetUrl = `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`;
@@ -92,9 +100,11 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0)
 
   // 1. Try fetching main channel data using proxy rotation
   for (let i = 0; i < PROXY_LIST.length; i++) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      
       try {
           const proxyUrl = PROXY_LIST[i](targetUrl);
-          const response = await fetchWithTimeout(proxyUrl, {}, currentTimeout); 
+          const response = await fetchWithTimeout(proxyUrl, { signal }, currentTimeout); 
           
           if (response.status === 404) {
               // Valid 404 from Kick means user doesn't exist. Don't retry.
@@ -112,7 +122,8 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0)
               usedProxyIndex = i;
               break; // Success!
           }
-      } catch (e) {
+      } catch (e: any) {
+          if (e.name === 'AbortError') throw e;
           await wait(2500);
           continue;
       }
@@ -140,7 +151,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0)
                // Strategy B: Fetch videos endpoint
                try {
                    const videosUrl = `https://kick.com/api/v2/channels/${originalUsername}/videos?_=${timestamp}`;
-                   const vResponse = await fetchWithTimeout(proxyFn(videosUrl), {}, 5000);
+                   const vResponse = await fetchWithTimeout(proxyFn(videosUrl), { signal }, 5000);
                    if (vResponse.ok) {
                        const vData = await vResponse.json();
                        if (vData && vData.length > 0) {
