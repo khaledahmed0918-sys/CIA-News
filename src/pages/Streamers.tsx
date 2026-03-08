@@ -91,57 +91,86 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
     setIsRetrying(false);
   };
 
+  if (streamer.isLoading) {
+    return (
+      <GlassCard className="h-[400px] p-0 overflow-hidden flex flex-col border-white/5">
+        <Skeleton className="h-32 w-full rounded-none" />
+        <div className="p-6 flex-1 flex flex-col gap-4">
+          <div className="flex items-center gap-4 -mt-12">
+            <Skeleton className="w-20 h-20 rounded-full border-4 border-[#0f172a]" />
+            <div className="flex-1 pt-8">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+          <div className="mt-auto flex gap-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        </div>
+      </GlassCard>
+    );
+  }
+
+  if (streamer.error) {
+    return (
+      <GlassCard className="p-0 overflow-hidden flex flex-col h-[400px] items-center justify-center group hover:shadow-red-500/10 transition-all duration-500 border-red-500/20 bg-red-500/5">
+        <div className="text-center p-6 flex flex-col items-center gap-4">
+          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 mb-2">
+            <WifiOff className="text-red-400" size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-white">@{streamer.username}</h3>
+          <p className="text-red-400/70 text-sm mb-4">فشل في جلب البيانات</p>
+          <button 
+            onClick={handleRetry}
+            disabled={isRetrying}
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full flex items-center gap-2 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+          >
+            <RefreshCw size={18} className={isRetrying ? 'animate-spin' : ''} />
+            {isRetrying ? 'جاري التحديث...' : 'تحديث البيانات'}
+          </button>
+        </div>
+      </GlassCard>
+    );
+  }
+
   return (
-    <GlassCard className={`p-0 overflow-hidden flex flex-col h-full group hover:shadow-blue-500/10 transition-all duration-500 border-white/5 ${streamer.error ? 'grayscale opacity-80' : ''}`}>
+    <GlassCard className="p-0 overflow-hidden flex flex-col h-full group hover:shadow-blue-500/10 transition-all duration-500 border-white/5">
       {/* Banner */}
       <div className="h-32 w-full relative overflow-hidden">
         <img 
-          src={streamer.banner_image || 'https://picsum.photos/seed/cia/800/200'} 
+          src={streamer.banner_image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} 
           alt={`${streamer.username} banner`} 
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${streamer.error ? 'blur-sm' : ''}`}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0f172a]/90" />
         
-        {/* Error Overlay */}
-        {streamer.error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10">
-            <button 
-              onClick={handleRetry}
-              disabled={isRetrying}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw size={16} className={isRetrying ? 'animate-spin' : ''} />
-              {isRetrying ? 'جاري التحديث...' : 'تحديث'}
-            </button>
-          </div>
-        )}
-
         {/* Live Status Badge */}
-        {!streamer.error && (
-          <div className="absolute top-3 left-3">
-            {streamer.is_live ? (
-              <div className="flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-                <Wifi size={14} />
-                LIVE
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-white/10">
-                <WifiOff size={14} />
-                OFFLINE
-              </div>
-            )}
-          </div>
-        )}
+        <div className="absolute top-3 left-3">
+          {streamer.is_live ? (
+            <div className="flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+              <Wifi size={14} />
+              LIVE
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+              <WifiOff size={14} />
+              OFFLINE
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
-      <div className={`p-5 flex-1 flex flex-col relative ${streamer.error ? 'blur-[2px]' : ''}`}>
+      <div className="p-5 flex-1 flex flex-col relative">
         {/* Avatar */}
         <div className="absolute -top-12 right-5">
           <div className={`p-1 rounded-full ${streamer.is_live ? 'bg-red-500 animate-pulse' : 'bg-[#0f172a] border border-white/10'}`}>
             <img 
-              src={streamer.profile_pic || `https://ui-avatars.com/api/?name=${streamer.username}&background=random`} 
+              src={streamer.profile_pic || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} 
               alt={streamer.username} 
               className="w-24 h-24 rounded-full object-cover border-4 border-[#0f172a] shadow-xl"
               loading="lazy"

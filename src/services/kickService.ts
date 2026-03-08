@@ -5,7 +5,7 @@ import type { Channel } from '../types';
 // Kick's API is protected by Cloudflare. Direct client-side calls often fail (CORS).
 // We use a rotation of CORS proxies to attempt to bypass this.
 
-const DEFAULT_PROFILE_PIC = 'https://i.postimg.cc/d18NsWjp/IMG-9068.jpg';
+const DEFAULT_PROFILE_PIC = '';
 
 // List of proxies to try in order. 
 // "corsproxy.io" is usually best but can be blocked.
