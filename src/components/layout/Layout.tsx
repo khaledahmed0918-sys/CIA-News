@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
+import { BottomNav } from './BottomNav';
 import { Footer } from './Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
@@ -38,9 +39,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />
+      <BottomNav isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       <motion.main
-        className="relative z-10 flex flex-col min-h-screen transition-all duration-300 ease-in-out will-change-transform"
+        className="relative z-10 flex flex-col min-h-screen transition-all duration-300 ease-in-out will-change-transform pb-24 lg:pb-0"
         style={{ 
           marginRight: isMobile ? 0 : (isSidebarOpen ? 320 : 120), // Increased margin for gap
           marginLeft: 0 // RTL layout

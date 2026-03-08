@@ -88,8 +88,11 @@ const getSafeChannelObj = (username: string, error = false): Channel => ({
  */
 export const fetchKickChannel = async (originalUsername: string, retryCount = 0, signal?: AbortSignal): Promise<Channel> => {
   const timestamp = Date.now();
-  // We append a timestamp to the Kick URL to prevent the Proxy from returning cached stale data
-  const targetUrl = `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`;
+  
+  const endpoints = [
+    `https://kick.com/api/v2/channels/${originalUsername}?_=${timestamp}`,
+    `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`
+  ];
   
   let data: any = null;
   let usedProxyIndex = -1;
@@ -98,45 +101,48 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
   const baseTimeout = 6000;
   const currentTimeout = baseTimeout + (retryCount * 2000);
 
-  // 1. Try fetching main channel data using proxy rotation
-  for (let i = 0; i < PROXY_LIST.length; i++) {
-      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-      
-      try {
-          const proxyUrl = PROXY_LIST[i](targetUrl);
-          const response = await fetchWithTimeout(proxyUrl, { signal }, currentTimeout); 
+  // 1. Try fetching main channel data using proxy rotation and multiple endpoints
+  for (const targetUrl of endpoints) {
+      for (let i = 0; i < PROXY_LIST.length; i++) {
+          if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
           
-          if (response.status === 404) {
-              // Valid 404 from Kick means user doesn't exist. Don't retry.
-              return getSafeChannelObj(originalUsername, false);
-          }
+          try {
+              const proxyUrl = PROXY_LIST[i](targetUrl);
+              const response = await fetchWithTimeout(proxyUrl, { signal }, currentTimeout); 
+              
+              if (response.status === 404) {
+                  // Valid 404 from Kick means user doesn't exist. Don't retry.
+                  return getSafeChannelObj(originalUsername, false);
+              }
 
-          if (!response.ok) {
-              await wait(2500); 
-              continue; 
-          }
+              if (!response.ok) {
+                  await wait(1500); 
+                  continue; 
+              }
 
-          const json = await response.json();
-          if (json && json.user) {
-              data = json;
-              usedProxyIndex = i;
-              break; // Success!
+              const json = await response.json();
+              if (json && json.user) {
+                  data = json;
+                  usedProxyIndex = i;
+                  break; // Success!
+              }
+          } catch (e: any) {
+              if (e.name === 'AbortError') throw e;
+              await wait(1500);
+              continue;
           }
-      } catch (e: any) {
-          if (e.name === 'AbortError') throw e;
-          await wait(2500);
-          continue;
       }
+      if (data) break;
   }
 
-  // If no data found after all proxies
+  // If no data found after all proxies and endpoints
   if (!data) {
       return getSafeChannelObj(originalUsername, true);
   }
 
   // 2. Process Data
   try {
-      const isLive = data.livestream !== null;
+      const isLive = data.livestream !== null && data.livestream !== undefined;
       let lastStreamStartTime = null;
 
       // Try fetching previous livestreams/videos if not live to get "Last Seen" data
@@ -163,11 +169,43 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
       }
 
       const socialLinks: { [key: string]: string } = {};
-      if (data.user?.twitter) socialLinks.twitter = data.user.twitter;
-      if (data.user?.youtube) socialLinks.youtube = data.user.youtube;
-      if (data.user?.instagram) socialLinks.instagram = data.user.instagram;
-      if (data.user?.discord) socialLinks.discord = data.user.discord;
-      if (data.user?.tiktok) socialLinks.tiktok = data.user.tiktok;
+      
+      // Helper to format social links correctly
+      const formatSocialLink = (platform: string, handle: string) => {
+          if (!handle || handle.trim() === '') return null;
+          handle = handle.trim();
+          if (handle.startsWith('http')) return handle;
+          
+          switch(platform) {
+              case 'twitter': return `https://twitter.com/${handle.replace('@', '')}`;
+              case 'instagram': return `https://instagram.com/${handle.replace('@', '')}`;
+              case 'youtube': return `https://youtube.com/${handle.startsWith('@') ? handle : '@'+handle}`;
+              case 'tiktok': return `https://tiktok.com/${handle.startsWith('@') ? handle : '@'+handle}`;
+              case 'discord': return handle.includes('discord.gg') ? handle : `https://discord.gg/${handle}`;
+              default: return handle;
+          }
+      };
+
+      if (data.user?.twitter) {
+          const link = formatSocialLink('twitter', data.user.twitter);
+          if (link) socialLinks.twitter = link;
+      }
+      if (data.user?.youtube) {
+          const link = formatSocialLink('youtube', data.user.youtube);
+          if (link) socialLinks.youtube = link;
+      }
+      if (data.user?.instagram) {
+          const link = formatSocialLink('instagram', data.user.instagram);
+          if (link) socialLinks.instagram = link;
+      }
+      if (data.user?.discord) {
+          const link = formatSocialLink('discord', data.user.discord);
+          if (link) socialLinks.discord = link;
+      }
+      if (data.user?.tiktok) {
+          const link = formatSocialLink('tiktok', data.user.tiktok);
+          if (link) socialLinks.tiktok = link;
+      }
 
       const followersCount = data.followers_count ?? data.followersCount ?? data.user?.followers_count ?? 0;
       

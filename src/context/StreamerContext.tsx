@@ -23,7 +23,6 @@ export const StreamerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       return await fetchKickChannel(username);
     } catch (error) {
-      console.error(`Error fetching ${username}:`, error);
       return {
         username,
         display_name: username,
@@ -61,7 +60,7 @@ export const StreamerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setStreamers(results);
       setLastUpdated(now);
     } catch (error) {
-      console.error("Failed to refresh streamers", error);
+      // Silently handle error
     } finally {
       setLoading(false);
     }

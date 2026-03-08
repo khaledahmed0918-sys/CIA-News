@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
         initial={false}
         animate={{
           width: isOpen ? 280 : (isMobile ? 0 : 80),
-          x: isMobile && !isOpen ? -280 : 0
+          x: isMobile && !isOpen ? 280 : 0
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className={cn(
@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
           
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-white/10 text-blue-200 transition-colors"
+            className="hidden lg:block p-2 rounded-lg hover:bg-white/10 text-blue-200 transition-colors"
           >
             {isOpen ? <ChevronRight size={20} /> : <Menu size={20} />}
           </button>
@@ -94,6 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={isMobile ? toggleSidebar : undefined}
               className={({ isActive }) => cn(
                 "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
                 isActive 
