@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobil
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed top-0 right-0 h-screen z-[100] flex flex-col border-l border-white/10 bg-[#0f172a]/95 backdrop-blur-xl shadow-2xl overflow-hidden",
+          "fixed top-0 right-0 h-screen z-[100] flex flex-col border-l border-white/10 bg-[#0f172a]/80 backdrop-blur-md shadow-2xl overflow-hidden",
           // Right-to-left layout for Arabic
           "rtl:left-auto rtl:right-0 ltr:right-auto ltr:left-0"
         )}

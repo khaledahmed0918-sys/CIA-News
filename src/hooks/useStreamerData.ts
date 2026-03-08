@@ -6,21 +6,20 @@ import type { Channel } from '@/types';
 export const useStreamerData = () => {
   const [streamers, setStreamers] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [retryCounts, setRetryCounts] = useState<Record<string, number>>({});
 
   const fetchAllStreamers = useCallback(async () => {
-    // Don't set loading to true on background refreshes to avoid UI flicker
     if (streamers.length === 0) setLoading(true);
     
     const slugs = streamerLinks.map(getStreamerSlug);
     
-    // Fetch in batches to avoid overwhelming the proxy/browser
+    // Fetch in batches
     const BATCH_SIZE = 5;
     const results: Channel[] = [];
     
     for (let i = 0; i < slugs.length; i += BATCH_SIZE) {
       const batch = slugs.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(batch.map(slug => fetchKickChannel(slug)));
+      const batchResults = await Promise.all(batch.map(slug => fetchKickChannel(slug, retryCounts[slug] || 0)));
       results.push(...batchResults);
     }
     
@@ -36,7 +35,20 @@ export const useStreamerData = () => {
 
     setStreamers(results);
     setLoading(false);
-  }, [streamers.length]);
+  }, [streamers.length, retryCounts]);
+
+  const retryStreamer = async (username: string) => {
+    // Increment retry count for this user
+    setRetryCounts(prev => ({
+      ...prev,
+      [username]: (prev[username] || 0) + 1
+    }));
+
+    // Optimistically update to loading state if you wanted, but here we just fetch
+    const updatedChannel = await fetchKickChannel(username, (retryCounts[username] || 0) + 1);
+    
+    setStreamers(prev => prev.map(s => s.username === username ? updatedChannel : s));
+  };
 
   useEffect(() => {
     fetchAllStreamers();
@@ -48,6 +60,7 @@ export const useStreamerData = () => {
     return () => clearInterval(interval);
   }, [fetchAllStreamers]);
 
-  return { streamers, loading, error, refetch: fetchAllStreamers };
+  return { streamers, loading, retryStreamer };
 };
+
 

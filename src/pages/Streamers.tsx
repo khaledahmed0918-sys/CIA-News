@@ -3,12 +3,12 @@ import { useStreamerData } from '@/hooks/useStreamerData';
 import type { Channel } from '@/types';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Search, Wifi, WifiOff, Twitter, Instagram, Youtube, Disc as Discord, Users, Clock } from 'lucide-react';
+import { Search, Wifi, WifiOff, Twitter, Instagram, Youtube, Disc as Discord, Users, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 export const Streamers: React.FC = () => {
-  const { streamers, loading } = useStreamerData();
+  const { streamers, loading, retryStreamer } = useStreamerData();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredStreamers = useMemo(() => {
@@ -64,7 +64,11 @@ export const Streamers: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredStreamers.map((streamer) => (
-            <StreamerCard key={streamer.username} streamer={streamer} />
+            <StreamerCard 
+              key={streamer.username} 
+              streamer={streamer} 
+              onRetry={() => retryStreamer(streamer.username)}
+            />
           ))}
           
           {filteredStreamers.length === 0 && (
@@ -78,37 +82,61 @@ export const Streamers: React.FC = () => {
   );
 };
 
-const StreamerCard: React.FC<{ streamer: Channel }> = ({ streamer }) => {
+const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ streamer, onRetry }) => {
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    await onRetry();
+    setIsRetrying(false);
+  };
+
   return (
-    <GlassCard className="p-0 overflow-hidden flex flex-col h-full group hover:shadow-blue-500/10 transition-all duration-500 border-white/5">
+    <GlassCard className={`p-0 overflow-hidden flex flex-col h-full group hover:shadow-blue-500/10 transition-all duration-500 border-white/5 ${streamer.error ? 'grayscale opacity-80' : ''}`}>
       {/* Banner */}
       <div className="h-32 w-full relative overflow-hidden">
         <img 
           src={streamer.banner_image || 'https://picsum.photos/seed/cia/800/200'} 
           alt={`${streamer.username} banner`} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${streamer.error ? 'blur-sm' : ''}`}
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0f172a]/90" />
         
+        {/* Error Overlay */}
+        {streamer.error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10">
+            <button 
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw size={16} className={isRetrying ? 'animate-spin' : ''} />
+              {isRetrying ? 'جاري التحديث...' : 'تحديث'}
+            </button>
+          </div>
+        )}
+
         {/* Live Status Badge */}
-        <div className="absolute top-3 left-3">
-          {streamer.is_live ? (
-            <div className="flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-              <Wifi size={14} />
-              LIVE
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-white/10">
-              <WifiOff size={14} />
-              OFFLINE
-            </div>
-          )}
-        </div>
+        {!streamer.error && (
+          <div className="absolute top-3 left-3">
+            {streamer.is_live ? (
+              <div className="flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                <Wifi size={14} />
+                LIVE
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+                <WifiOff size={14} />
+                OFFLINE
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="p-5 flex-1 flex flex-col relative">
+      <div className={`p-5 flex-1 flex flex-col relative ${streamer.error ? 'blur-[2px]' : ''}`}>
         {/* Avatar */}
         <div className="absolute -top-12 right-5">
           <div className={`p-1 rounded-full ${streamer.is_live ? 'bg-red-500 animate-pulse' : 'bg-[#0f172a] border border-white/10'}`}>

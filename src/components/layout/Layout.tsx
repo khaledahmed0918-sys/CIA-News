@@ -40,10 +40,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />
 
       <motion.main
-        layout
         className="relative z-10 flex flex-col min-h-screen transition-all duration-300 ease-in-out will-change-transform"
         style={{ 
-          marginRight: isMobile ? 0 : (isSidebarOpen ? 280 : 80),
+          marginRight: isMobile ? 0 : (isSidebarOpen ? 300 : 100), // Increased margin for gap
           marginLeft: 0 // RTL layout
         }}
       >

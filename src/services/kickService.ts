@@ -5,7 +5,7 @@ import type { Channel } from '../types';
 // Kick's API is protected by Cloudflare. Direct client-side calls often fail (CORS).
 // We use a rotation of CORS proxies to attempt to bypass this.
 
-const DEFAULT_PROFILE_PIC = 'https://i.postimg.cc/vH9VNdH8/IMG-8915.jpg';
+const DEFAULT_PROFILE_PIC = 'https://i.postimg.cc/d18NsWjp/IMG-9068.jpg';
 
 // List of proxies to try in order. 
 // "corsproxy.io" is usually best but can be blocked.
@@ -78,20 +78,23 @@ const getSafeChannelObj = (username: string, error = false): Channel => ({
 /**
  * Fetches data for a single Kick channel using multi-proxy rotation.
  */
-export const fetchKickChannel = async (originalUsername: string): Promise<Channel> => {
+export const fetchKickChannel = async (originalUsername: string, retryCount = 0): Promise<Channel> => {
   const timestamp = Date.now();
   // We append a timestamp to the Kick URL to prevent the Proxy from returning cached stale data
   const targetUrl = `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`;
   
   let data: any = null;
   let usedProxyIndex = -1;
+  
+  // Increase timeout based on retry count
+  const baseTimeout = 6000;
+  const currentTimeout = baseTimeout + (retryCount * 2000);
 
   // 1. Try fetching main channel data using proxy rotation
   for (let i = 0; i < PROXY_LIST.length; i++) {
       try {
           const proxyUrl = PROXY_LIST[i](targetUrl);
-          // 6s timeout per proxy to allow failover reasonably quickly
-          const response = await fetchWithTimeout(proxyUrl, {}, 6000); 
+          const response = await fetchWithTimeout(proxyUrl, {}, currentTimeout); 
           
           if (response.status === 404) {
               // Valid 404 from Kick means user doesn't exist. Don't retry.
@@ -99,8 +102,6 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
           }
 
           if (!response.ok) {
-              // If proxy fails or returns bad status, wait a bit before trying next proxy
-              // This implements the "stop 2-3 seconds" logic for failed attempts
               await wait(2500); 
               continue; 
           }
@@ -112,7 +113,6 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
               break; // Success!
           }
       } catch (e) {
-          // Network error or timeout, wait and try next proxy
           await wait(2500);
           continue;
       }
@@ -120,7 +120,6 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
 
   // If no data found after all proxies
   if (!data) {
-      console.warn(`All proxies failed for ${originalUsername}`);
       return getSafeChannelObj(originalUsername, true);
   }
 
@@ -174,7 +173,7 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
           profile_url: `https://kick.com/${originalUsername}`,
           bio: data.user.bio || null,
           followers_count: Number(followersCount),
-          banner_image: data.banner_image?.url || null,
+          banner_image: data.banner_image || null,
           live_category: data.livestream?.category?.name || null,
           social_links: socialLinks,
           isLoading: false,
@@ -182,7 +181,6 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
       };
 
   } catch (error) {
-      console.error(`Error processing data for ${originalUsername}`, error);
       return getSafeChannelObj(originalUsername, true);
   }
 };
@@ -193,3 +191,4 @@ export const fetchKickChannel = async (originalUsername: string): Promise<Channe
 export const fetchChannelStatuses = async (streamers: any[]) => {
     return { checked_at: new Date().toISOString(), data: [] };
 };
+
