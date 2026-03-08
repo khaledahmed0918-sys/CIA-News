@@ -13,9 +13,9 @@ export const Analytics: React.FC = () => {
       
       <div className="grid grid-cols-1 gap-8">
         {analyticsData.map((item, index) => (
-          <GlassCard key={item.id} className="p-0 overflow-hidden flex flex-col md:flex-row">
+          <GlassCard key={item.id} className="p-0 overflow-hidden flex flex-col">
             <div 
-              className="w-full md:w-1/3 h-64 md:h-auto relative cursor-pointer group overflow-hidden"
+              className="w-full h-64 md:h-96 relative cursor-pointer group overflow-hidden"
               onClick={() => setSelectedImage(item.image)}
             >
               <img 

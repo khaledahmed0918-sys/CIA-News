@@ -170,6 +170,9 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
       if (data.user?.tiktok) socialLinks.tiktok = data.user.tiktok;
 
       const followersCount = data.followers_count ?? data.followersCount ?? data.user?.followers_count ?? 0;
+      
+      // Banner image can be in root or user object
+      const bannerImage = data.banner_image?.url || data.user?.banner_image?.url || data.banner_image || data.user?.banner_image || null;
 
       return {
           username: originalUsername,
@@ -184,7 +187,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
           profile_url: `https://kick.com/${originalUsername}`,
           bio: data.user.bio || null,
           followers_count: Number(followersCount),
-          banner_image: data.banner_image || null,
+          banner_image: bannerImage,
           live_category: data.livestream?.category?.name || null,
           social_links: socialLinks,
           isLoading: false,

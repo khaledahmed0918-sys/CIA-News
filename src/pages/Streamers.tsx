@@ -143,7 +143,7 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
             <img 
               src={streamer.profile_pic || `https://ui-avatars.com/api/?name=${streamer.username}&background=random`} 
               alt={streamer.username} 
-              className="w-20 h-20 rounded-full object-cover border-4 border-[#0f172a] shadow-xl"
+              className="w-24 h-24 rounded-full object-cover border-4 border-[#0f172a] shadow-xl"
               loading="lazy"
             />
           </div>
@@ -166,13 +166,13 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
               {new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(streamer.followers_count || 0)}
             </div>
           </div>
-          <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5">
+          <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5 flex flex-col justify-center">
             <div className="text-xs text-blue-300/50 mb-1">{streamer.is_live ? 'المشاهدون' : 'آخر بث'}</div>
-            <div className="font-mono font-bold text-blue-100 text-xs flex items-center justify-center h-full">
+            <div className="font-mono font-bold text-blue-100 text-xs flex items-center justify-center">
               {streamer.is_live ? (
                 <span className="text-red-400">{streamer.viewer_count?.toLocaleString()}</span>
               ) : (
-                <span className="text-[10px] opacity-70">
+                <span className="text-[10px] leading-tight opacity-70 whitespace-nowrap">
                   {streamer.last_stream_start_time 
                     ? formatDistanceToNow(new Date(streamer.last_stream_start_time), { addSuffix: true, locale: ar })
                     : 'غير متوفر'}
@@ -198,18 +198,23 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
         </div>
 
         {/* Socials */}
-        <div className="mt-auto pt-4 border-t border-white/5 flex gap-2 justify-end">
+        <div className="mt-auto pt-4 border-t border-white/5 flex gap-2 justify-end flex-wrap">
           {streamer.social_links.twitter && (
-            <SocialIcon href={streamer.social_links.twitter} icon={Twitter} color="hover:text-blue-400" />
+            <SocialIcon href={streamer.social_links.twitter} icon={Twitter} className="text-blue-400 bg-blue-500/10 hover:bg-blue-500/20" />
           )}
           {streamer.social_links.instagram && (
-            <SocialIcon href={streamer.social_links.instagram} icon={Instagram} color="hover:text-pink-500" />
+            <SocialIcon href={streamer.social_links.instagram} icon={Instagram} className="text-pink-400 bg-pink-500/10 hover:bg-pink-500/20" />
           )}
           {streamer.social_links.youtube && (
-            <SocialIcon href={streamer.social_links.youtube} icon={Youtube} color="hover:text-red-500" />
+            <SocialIcon href={streamer.social_links.youtube} icon={Youtube} className="text-red-400 bg-red-500/10 hover:bg-red-500/20" />
           )}
           {streamer.social_links.discord && (
-            <SocialIcon href={streamer.social_links.discord} icon={Discord} color="hover:text-indigo-400" />
+            <SocialIcon href={streamer.social_links.discord} icon={Discord} className="text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20" />
+          )}
+          {streamer.social_links.tiktok && (
+            <SocialIcon href={streamer.social_links.tiktok} icon={({size, className}) => (
+               <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+            )} className="text-pink-400 bg-pink-500/10 hover:bg-pink-500/20" />
           )}
            <a 
             href={`https://kick.com/${streamer.username}`} 
@@ -225,12 +230,12 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
   );
 };
 
-const SocialIcon: React.FC<{ href: string; icon: any; color: string }> = ({ href, icon: Icon, color }) => (
+const SocialIcon: React.FC<{ href: string; icon: any; className: string }> = ({ href, icon: Icon, className }) => (
   <a 
     href={href} 
     target="_blank" 
     rel="noopener noreferrer"
-    className={`p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 ${color} transition-all duration-300`}
+    className={`p-2 rounded-lg transition-all duration-300 ${className}`}
   >
     <Icon size={16} />
   </a>

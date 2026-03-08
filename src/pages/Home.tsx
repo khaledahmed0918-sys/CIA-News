@@ -80,7 +80,7 @@ export const Home: React.FC = () => {
         {sections.map((section, index) => (
           <Link to={section.path} key={section.path}>
             <GlassCard 
-              className="h-full p-6 flex flex-col items-center text-center group transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/20"
+              className="h-full p-6 flex flex-col items-start text-right group transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/20"
             >
               <div className={`w-16 h-16 rounded-2xl ${section.bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:rotate-6`}>
                 <section.icon size={32} className={section.color} />

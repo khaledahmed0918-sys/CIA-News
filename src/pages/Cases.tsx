@@ -16,12 +16,12 @@ export const Cases: React.FC = () => {
             {/* Decorative background element */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/50 via-transparent to-transparent opacity-50" />
             
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 pt-4">
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                  <h3 className="text-2xl font-bold text-red-200 border-r-4 border-red-500 pr-4 pl-2">
                     {item.subject}
                  </h3>
-                 <span className="text-xs font-mono text-blue-400/50 bg-blue-900/20 px-3 py-1 rounded-full border border-blue-500/10">
+                 <span className="text-xs font-mono text-blue-400/50 bg-blue-900/20 px-3 py-1 rounded-full border border-blue-500/10 uppercase">
                     CASE #{item.id}
                  </span>
               </div>
