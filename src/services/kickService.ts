@@ -11,6 +11,7 @@ const DEFAULT_PROFILE_PIC = '';
 // "corsproxy.io" is usually best but can be blocked.
 // "api.allorigins.win" is a good fallback.
 const PROXY_LIST = [
+    (url: string, username: string) => `/api/kick/${username}`,
     (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
     (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
 ];
@@ -89,55 +90,48 @@ const getSafeChannelObj = (username: string, error = false): Channel => ({
 export const fetchKickChannel = async (originalUsername: string, retryCount = 0, signal?: AbortSignal): Promise<Channel> => {
   const timestamp = Date.now();
   
-  const endpoints = [
-    `https://kick.com/api/v2/channels/${originalUsername}?_=${timestamp}`,
-    `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`
-  ];
-  
   let data: any = null;
   let usedProxyIndex = -1;
   
-  // Increase timeout based on retry count
-  const baseTimeout = 6000;
-  const currentTimeout = baseTimeout + (retryCount * 2000);
-
-  // 1. Try fetching main channel data using proxy rotation and multiple endpoints
-  for (const targetUrl of endpoints) {
-      for (let i = 0; i < PROXY_LIST.length; i++) {
-          if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-          
-          try {
-              const proxyUrl = PROXY_LIST[i](targetUrl);
-              const response = await fetchWithTimeout(proxyUrl, { signal }, currentTimeout); 
-              
-              if (response.status === 404) {
-                  // Valid 404 from Kick means user doesn't exist. Don't retry.
-                  return getSafeChannelObj(originalUsername, false);
-              }
-
-              if (!response.ok) {
-                  await wait(1500); 
-                  continue; 
-              }
-
-              const json = await response.json();
-              if (json && json.user) {
-                  data = json;
-                  usedProxyIndex = i;
-                  break; // Success!
-              }
-          } catch (e: any) {
-              if (e.name === 'AbortError') throw e;
-              await wait(1500);
-              continue;
-          }
+  // 1. Try our internal proxy first (fastest)
+  try {
+      const response = await fetchWithTimeout(`/api/kick/${originalUsername}`, { signal }, 4000);
+      if (response.status === 404) return getSafeChannelObj(originalUsername, false);
+      if (response.ok) {
+          data = await response.json();
+          usedProxyIndex = 0;
       }
-      if (data) break;
+  } catch (e) { /* ignore */ }
+
+  // 2. Fallback to corsproxy.io
+  if (!data || !data.user) {
+      try {
+          const targetUrl = `https://kick.com/api/v2/channels/${originalUsername}?_=${timestamp}`;
+          const response = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { signal }, 4000);
+          if (response.status === 404) return getSafeChannelObj(originalUsername, false);
+          if (response.ok) {
+              data = await response.json();
+              usedProxyIndex = 1;
+          }
+      } catch (e) { /* ignore */ }
   }
 
-  // If no data found after all proxies and endpoints
-  if (!data) {
-      return getSafeChannelObj(originalUsername, true);
+  // 3. Fallback to allorigins
+  if (!data || !data.user) {
+      try {
+          const targetUrl = `https://kick.com/api/v1/channels/${originalUsername}?_=${timestamp}`;
+          const response = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, { signal }, 4000);
+          if (response.status === 404) return getSafeChannelObj(originalUsername, false);
+          if (response.ok) {
+              data = await response.json();
+              usedProxyIndex = 2;
+          }
+      } catch (e) { /* ignore */ }
+  }
+
+  // If no data found after all proxies
+  if (!data || !data.user) {
+      return getSafeChannelObj(originalUsername, false);
   }
 
   // 2. Process Data
@@ -157,7 +151,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
                // Strategy B: Fetch videos endpoint
                try {
                    const videosUrl = `https://kick.com/api/v2/channels/${originalUsername}/videos?_=${timestamp}`;
-                   const vResponse = await fetchWithTimeout(proxyFn(videosUrl), { signal }, 5000);
+                   const vResponse = await fetchWithTimeout(proxyFn(videosUrl, originalUsername), { signal }, 5000);
                    if (vResponse.ok) {
                        const vData = await vResponse.json();
                        if (vData && vData.length > 0) {
@@ -238,7 +232,7 @@ export const fetchKickChannel = async (originalUsername: string, retryCount = 0,
       };
 
   } catch (error) {
-      return getSafeChannelObj(originalUsername, true);
+      return getSafeChannelObj(originalUsername, false);
   }
 };
 

@@ -5,9 +5,6 @@ import { Modal } from '@/components/ui/Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Search, Loader2 } from 'lucide-react';
 import axios from 'axios';
-import { analyticsData } from '@/data/analytics';
-import { casesData } from '@/data/cases';
-import { wantedData } from '@/data/wanted';
 
 interface Character {
   id: number;
@@ -116,8 +113,20 @@ export const Characters: React.FC = () => {
           {filteredCharacters.map((c) => (
             <GlassCard key={c.id} className="p-2 group overflow-hidden">
               <div className="relative overflow-hidden rounded-xl cursor-pointer aspect-[3/4]" onClick={() => setSelectedImage(c.image_url)}>
-                <img src={c.image_url} alt={c.character_name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                <img 
+                  src={c.image_url} 
+                  alt={c.character_name} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  loading="lazy"
+                  onLoad={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.parentElement?.querySelector('.image-loader')?.remove();
+                  }}
+                />
+                <div className="image-loader absolute inset-0 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm z-10">
+                  <Loader2 className="animate-spin text-blue-500" size={32} />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-20">
                   <h3 className="text-white font-bold text-lg">{c.character_name}</h3>
                   <p className="text-blue-400 text-sm">{c.person_name}</p>
                 </div>
@@ -130,8 +139,8 @@ export const Characters: React.FC = () => {
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isFormOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] backdrop-blur-sm bg-black/15 flex items-center justify-center p-4">
-              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#0f172a] border border-white/10 p-8 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl my-auto">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] backdrop-blur-sm bg-black/15 flex items-center justify-center p-4 overflow-y-auto">
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#0f172a] border border-white/10 p-8 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl m-auto">
                 <h3 className="text-xl font-bold text-white">إضافة صورة جديدة</h3>
                 <input type="text" placeholder="ادخل اسمك" value={formData.person_name} onChange={e => setFormData({...formData, person_name: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
                 <input type="text" placeholder="اكتب اسم الشخصية" value={formData.character_name} onChange={e => setFormData({...formData, character_name: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />

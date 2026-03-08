@@ -8,7 +8,7 @@ import axios from 'axios';
 import { analyticsData } from '@/data/analytics';
 
 interface Analysis {
-  id: number;
+  id: number | string;
   image_url: string;
   person_name: string;
   message: string;
@@ -29,25 +29,31 @@ export const Analytics: React.FC = () => {
   const fetchAnalyses = async () => {
     try {
       const response = await axios.get('/api/analyze');
-      // Map static data to Analysis interface (ensure id is number for consistency)
-      const staticData = analyticsData.map((i, idx) => ({ 
-        id: 10000 + idx, // Use a large number to avoid collision
-        image_url: i.image, 
-        person_name: 'إدارة CIA', 
-        message: i.content,
-        characters: i.subject
+      const supabaseData = Array.isArray(response.data) ? response.data.map((item: any) => ({
+        ...item,
+        id: item.id
+      })) : [];
+      
+      const localData = analyticsData.map(item => ({
+        id: item.id,
+        image_url: item.image,
+        person_name: 'CIA', // Default name for local data
+        message: item.content,
+        characters: item.subject
       }));
-      setAnalyses([...staticData, ...response.data]);
+
+      setAnalyses([...supabaseData, ...localData]);
     } catch (error) {
-      console.error('Failed to fetch analyses, using static data only', error);
-      const staticData = analyticsData.map((i, idx) => ({ 
-        id: 10000 + idx, 
-        image_url: i.image, 
-        person_name: 'إدارة CIA', 
-        message: i.content,
-        characters: i.subject
+      console.error('Failed to fetch analyses', error);
+      // If supabase fails, still show local data
+      const localData = analyticsData.map(item => ({
+        id: item.id,
+        image_url: item.image,
+        person_name: 'CIA',
+        message: item.content,
+        characters: item.subject
       }));
-      setAnalyses(staticData);
+      setAnalyses(localData);
     }
   };
 
@@ -56,6 +62,17 @@ export const Analytics: React.FC = () => {
       alert('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
+    
+    if (formData.image_source === 'link' && !formData.image_url) {
+      alert('يرجى إدخال رابط الصورة');
+      return;
+    }
+    
+    if (formData.image_source === 'upload' && !formData.file) {
+      alert('يرجى اختيار صورة');
+      return;
+    }
+
     setIsUploading(true);
     
     try {
@@ -102,7 +119,19 @@ export const Analytics: React.FC = () => {
             <GlassCard key={item.id} className="p-0 overflow-hidden flex flex-col">
               {item.image_url && (
                 <div className="w-full h-64 md:h-96 relative cursor-pointer group overflow-hidden" onClick={() => setSelectedImage(item.image_url)}>
-                  <img src={item.image_url} alt={item.person_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img 
+                    src={item.image_url} 
+                    alt={item.person_name} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                    loading="lazy"
+                    onLoad={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.parentElement?.querySelector('.image-loader')?.remove();
+                    }}
+                  />
+                  <div className="image-loader absolute inset-0 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm z-10">
+                    <Loader2 className="animate-spin text-blue-500" size={32} />
+                  </div>
                 </div>
               )}
               <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
@@ -120,8 +149,8 @@ export const Analytics: React.FC = () => {
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isFormOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] backdrop-blur-sm bg-black/15 flex items-center justify-center p-4">
-              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#0f172a] border border-white/10 p-8 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl my-auto">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] backdrop-blur-sm bg-black/15 flex items-center justify-center p-4 overflow-y-auto">
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#0f172a] border border-white/10 p-8 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl m-auto">
                 <h3 className="text-xl font-bold text-white">إضافة تحليل/ثريد جديد</h3>
                 <input type="text" placeholder="اكتب اسمك" value={formData.person_name} onChange={e => setFormData({...formData, person_name: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
                 <input type="text" placeholder="عنوان التحليل/الثريد" value={formData.characters} onChange={e => setFormData({...formData, characters: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
@@ -131,7 +160,7 @@ export const Analytics: React.FC = () => {
                   <button onClick={() => setFormData({...formData, image_source: 'upload'})} className={`flex-1 p-2 rounded-xl ${formData.image_source === 'upload' ? 'bg-blue-600' : 'bg-[#1e293b]'}`}>تحميل</button>
                 </div>
                 {formData.image_source === 'link' ? (
-                  <input type="text" placeholder="رابط الصورة (اختياري)" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
+                  <input type="text" placeholder="رابط الصورة (مطلوب)" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
                 ) : (
                   <input type="file" onChange={e => setFormData({...formData, file: e.target.files?.[0] || null})} className="w-full bg-[#1e293b] p-3 rounded-xl text-white" />
                 )}

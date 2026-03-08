@@ -27,7 +27,7 @@ export const StreamerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         username,
         display_name: username,
         is_live: false,
-        error: true,
+        error: false,
         isLoading: false,
         profile_pic: '',
         live_url: `https://kick.com/${username}`,
@@ -77,6 +77,17 @@ export const StreamerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       s.username === username ? newData : s
     ));
   }, [fetchStreamerData]);
+
+  // Auto-retry failed streamers
+  useEffect(() => {
+    const failedStreamers = streamers.filter(s => s.error && !s.isLoading);
+    if (failedStreamers.length > 0) {
+      const timer = setTimeout(() => {
+        failedStreamers.forEach(s => retryStreamer(s.username));
+      }, 3000); // Retry after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [streamers, retryStreamer]);
 
   // Initial fetch
   useEffect(() => {

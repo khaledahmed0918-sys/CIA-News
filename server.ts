@@ -78,25 +78,30 @@ async function startServer() {
   app.get('/api/kick/:user', async (req, res) => {
     const { user } = req.params;
     try {
-      // Trying to fetch from Kick's internal API if possible, or scrape.
-      // Since Kick uses Cloudflare, direct scraping might be hard.
-      // However, for this demo, we will try a known endpoint.
-      // If this fails, we might need to rely on client-side or a different method.
-      // Note: This is a best-effort attempt.
-      
-      const response = await axios.get(`https://kick.com/api/v1/channels/${user}`, {
+      const response = await axios.get(`https://kick.com/api/v2/channels/${user}`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9',
           'Referer': 'https://kick.com/'
         },
-        timeout: 5000
+        timeout: 8000
       });
-      
       res.json(response.data);
     } catch (error: any) {
-      console.error(`Error fetching data for ${user}:`, error.message);
-      res.status(500).json({ error: 'Failed to fetch data', details: error.message });
+      try {
+        const responseV1 = await axios.get(`https://kick.com/api/v1/channels/${user}`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json',
+            'Referer': 'https://kick.com/'
+          },
+          timeout: 8000
+        });
+        res.json(responseV1.data);
+      } catch (fallbackError: any) {
+        res.status(500).json({ error: 'Failed to fetch data', details: fallbackError.message });
+      }
     }
   });
 
@@ -115,7 +120,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    // Server started
   });
 }
 
