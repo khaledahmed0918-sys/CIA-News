@@ -22,7 +22,7 @@ const rightNavItems = [
 
 export const BottomNav: React.FC<BottomNavProps> = ({ isOpen, toggleSidebar }) => {
   return (
-    <div className="lg:hidden fixed bottom-4 left-4 right-4 z-[110] flex items-center justify-between px-2 py-2 bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+    <div className="lg:hidden fixed bottom-4 left-4 right-4 z-[110] flex items-center justify-between px-2 py-2 bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl transform-gpu">
       
       {/* Left Icons */}
       <div className="flex items-center gap-1 sm:gap-2 flex-1 justify-around">

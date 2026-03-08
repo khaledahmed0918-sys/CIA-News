@@ -30,12 +30,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="min-h-screen bg-[#0a0f1c] text-white font-sans selection:bg-blue-500/30 selection:text-blue-100 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0f1c] text-white font-sans selection:bg-blue-500/30 selection:text-blue-100">
       {/* Background Ambience */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px]" />
-        <div className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[80px]" />
+      <div className="fixed inset-0 z-0 pointer-events-none transform-gpu">
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] transform-gpu" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] transform-gpu" />
+        <div className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[80px] transform-gpu" />
       </div>
 
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />
@@ -51,7 +51,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="flex-1 p-6 md:p-8 lg:p-12 max-w-[1600px] mx-auto w-full">
             <div
               key={location.pathname}
-              className="w-full animate-in fade-in duration-300"
+              className="w-full animate-in fade-in duration-300 transform-gpu"
             >
               {children}
             </div>

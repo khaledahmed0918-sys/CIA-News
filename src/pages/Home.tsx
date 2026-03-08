@@ -62,7 +62,7 @@ export const Home: React.FC = () => {
       <div className="relative w-full rounded-3xl overflow-hidden mb-12 flex flex-col items-center justify-center py-24 px-4 border border-white/5 bg-slate-900/20">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 z-0 opacity-20"
+          className="absolute inset-0 z-0 opacity-20 transform-gpu"
           style={{ 
             backgroundImage: 'url("https://i.postimg.cc/QdnfpfkC/received-858179620603677.jpg")',
             backgroundSize: 'cover',
@@ -78,6 +78,26 @@ export const Home: React.FC = () => {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center text-center w-full">
+          {/* Logo Image */}
+          <motion.img
+            src="https://i.postimg.cc/QdnfpfkC/received-858179620603677.jpg"
+            alt="CIA News Logo"
+            className="w-32 h-32 md:w-48 md:h-48 rounded-full mb-6 object-cover shadow-[0_0_30px_rgba(59,130,246,0.5)] border-2 border-blue-500/30"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              boxShadow: [
+                "0 0 20px rgba(59, 130, 246, 0.3)",
+                "0 0 40px rgba(59, 130, 246, 0.6)",
+                "0 0 20px rgba(59, 130, 246, 0.3)"
+              ]
+            }}
+            transition={{ 
+              duration: 4, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+          />
+
           {/* Breathing Logo/Text */}
           <motion.h1 
             animate={{ 

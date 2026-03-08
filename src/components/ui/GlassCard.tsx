@@ -16,7 +16,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, className, hover
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "relative overflow-hidden rounded-[20px] border border-white/10 bg-[#0f172a]/80 backdrop-blur-md shadow-lg",
+        "relative overflow-hidden rounded-[20px] border border-white/10 bg-[#0f172a]/80 backdrop-blur-md shadow-lg transform-gpu",
         hoverEffect && "hover:bg-[#1e293b]/80 transition-colors duration-300",
         className
       )}
