@@ -10,6 +10,67 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use(express.json({ limit: '50mb' }));
+
+  // API Proxy for ImgBB
+  app.post('/api/upload-image', async (req, res) => {
+    try {
+      const response = await axios.post('https://api.imgbb.com/1/upload', req.body, {
+        params: { key: process.env.IMGBB_API_KEY }
+      });
+      res.json(response.data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to upload image', details: error.message });
+    }
+  });
+
+  // API Proxy for Supabase
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFucnF5cGhwcnVnZ2F4dmVweHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODQ0NDEsImV4cCI6MjA4ODU2MDQ0MX0.PDRzYd3K_tZgXVvriYiU0oQ7XC-vnzPPxkI7eLRNPHo';
+
+  const supabaseHeaders = {
+    'apikey': SUPABASE_API_KEY,
+    'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+
+  app.post('/api/characters', async (req, res) => {
+    try {
+      const response = await axios.post(`${SUPABASE_URL}/rest/v1/characters`, req.body, { headers: supabaseHeaders });
+      res.json(response.data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to add character', details: error.message });
+    }
+  });
+
+  app.get('/api/characters', async (req, res) => {
+    try {
+      const response = await axios.get(`${SUPABASE_URL}/rest/v1/characters?select=*`, { headers: supabaseHeaders });
+      res.json(response.data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch characters', details: error.message });
+    }
+  });
+
+  app.post('/api/analyze', async (req, res) => {
+    try {
+      const response = await axios.post(`${SUPABASE_URL}/rest/v1/analyze`, req.body, { headers: supabaseHeaders });
+      res.json(response.data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to add analysis', details: error.message });
+    }
+  });
+
+  app.get('/api/analyze', async (req, res) => {
+    try {
+      const response = await axios.get(`${SUPABASE_URL}/rest/v1/analyze?select=*`, { headers: supabaseHeaders });
+      res.json(response.data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch analysis', details: error.message });
+    }
+  });
+
   // API Proxy for Kick
   app.get('/api/kick/:user', async (req, res) => {
     const { user } = req.params;
