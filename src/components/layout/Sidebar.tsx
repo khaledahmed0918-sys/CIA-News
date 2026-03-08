@@ -28,8 +28,8 @@ const navItems = [
   { name: 'حسابات أعضاء CIA', path: '/streamers', icon: Users },
   { name: 'القضايا', path: '/cases', icon: FileText },
   { name: 'المطلوبين', path: '/wanted', icon: AlertTriangle },
-  { name: 'معلومات عامة', path: '/general', icon: Info },
   { name: 'صور الشخصيات', path: '/characters', icon: ImageIcon },
+  { name: 'معلومات عامة', path: '/general', icon: Info },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) => {

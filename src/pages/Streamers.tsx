@@ -18,6 +18,7 @@ const isValidSocialLink = (link: string | undefined) => {
 export const Streamers: React.FC = () => {
   const { streamers, loading, retryStreamer } = useStreamerData();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isReloadingAll, setIsReloadingAll] = useState(false);
 
   const filteredStreamers = useMemo(() => {
     return streamers.filter(s => 
@@ -25,6 +26,15 @@ export const Streamers: React.FC = () => {
       (s.live_title && s.live_title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [streamers, searchQuery]);
+
+  const failedStreamers = useMemo(() => streamers.filter(s => s.error), [streamers]);
+  const failedCount = failedStreamers.length;
+
+  const handleReloadAllFailed = async () => {
+    setIsReloadingAll(true);
+    await Promise.all(failedStreamers.map(s => retryStreamer(s.username)));
+    setIsReloadingAll(false);
+  };
 
   return (
     <div className="space-y-8">
@@ -34,21 +44,33 @@ export const Streamers: React.FC = () => {
           حسابات أعضاء CIA
         </h2>
         
-        <div className="relative w-full md:w-96">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400/50" size={20} />
-          <input
-            type="text"
-            placeholder="ابحث عن عضو..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pr-12 pl-4 text-white placeholder-blue-400/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-          />
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          {failedCount > 0 && (
+            <button
+              onClick={handleReloadAllFailed}
+              disabled={isReloadingAll}
+              className="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-4 py-3 rounded-xl flex items-center gap-2 transition-all font-bold whitespace-nowrap disabled:opacity-50"
+            >
+              <RefreshCw size={18} className={isReloadingAll ? 'animate-spin' : ''} />
+              إعادة تحميل ({failedCount})
+            </button>
+          )}
+          <div className="relative w-full md:w-96">
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400/50" size={20} />
+            <input
+              type="text"
+              placeholder="ابحث عن عضو..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pr-12 pl-4 text-white placeholder-blue-400/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+            />
+          </div>
         </div>
       </div>
 
       {loading && streamers.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[...Array(6)].map((_, i) => (
             <GlassCard key={i} className="h-[400px] p-0 overflow-hidden flex flex-col">
               <Skeleton className="h-32 w-full rounded-none" />
               <div className="p-6 flex-1 flex flex-col gap-4">
@@ -70,7 +92,7 @@ export const Streamers: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredStreamers.map((streamer) => (
             <StreamerCard 
               key={streamer.username} 
@@ -137,7 +159,7 @@ const StreamerCard: React.FC<{ streamer: Channel; onRetry: () => void }> = ({ st
             className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full flex items-center gap-2 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-bold"
           >
             <RefreshCw size={18} className={isRetrying ? 'animate-spin' : ''} />
-            {isRetrying ? 'جاري التحديث...' : 'تحديث البيانات'}
+            {isRetrying ? 'جاري التحميل...' : 'إعادة تحميل'}
           </button>
         </div>
       </GlassCard>
