@@ -15,6 +15,7 @@ import { General } from '@/pages/General';
 import { Characters } from '@/pages/Characters';
 import { Analytics } from '@/pages/Analytics';
 import { Schedule } from '@/pages/Schedule';
+import { Stories } from '@/pages/Stories';
 import { StreamerProvider } from '@/context/StreamerContext';
 
 function AppContent() {
@@ -28,6 +29,7 @@ function AppContent() {
       <Route path="/wanted" element={<Wanted />} />
       <Route path="/general" element={<General />} />
       <Route path="/characters" element={<Characters />} />
+      <Route path="/stories" element={<Stories />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/schedule" element={<Schedule />} />
     </Routes>

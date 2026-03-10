@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { BarChart2, Users, FileText, AlertTriangle, Info, Image as ImageIcon, TableProperties } from 'lucide-react';
+import { BarChart2, Users, FileText, AlertTriangle, Info, Image as ImageIcon, TableProperties, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const sections = [
@@ -46,20 +46,28 @@ const sections = [
     bg: 'bg-yellow-500/10'
   },
   {
-    title: 'معلومات عامة',
-    description: 'كل ما تحتاج معرفته عن وكالة الاستخبارات المركزية.',
-    icon: Info,
-    path: '/general',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-500/10'
-  },
-  {
     title: 'صور الشخصيات',
     description: 'معرض صور حصري لشخصيات الوكالة.',
     icon: ImageIcon,
     path: '/characters',
     color: 'text-purple-400',
     bg: 'bg-purple-500/10'
+  },
+  {
+    title: 'قصص الشخصيات',
+    description: 'سجلات وحكايات أعضاء الوكالة.',
+    icon: BookOpen,
+    path: '/stories',
+    color: 'text-pink-400',
+    bg: 'bg-pink-500/10'
+  },
+  {
+    title: 'معلومات عامة',
+    description: 'كل ما تحتاج معرفته عن وكالة الاستخبارات المركزية.',
+    icon: Info,
+    path: '/general',
+    color: 'text-cyan-400',
+    bg: 'bg-cyan-500/10'
   }
 ];
 

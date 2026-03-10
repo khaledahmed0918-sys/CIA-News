@@ -13,7 +13,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  TableProperties
+  TableProperties,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
@@ -31,6 +32,7 @@ const navItems = [
   { name: 'القضايا', path: '/cases', icon: FileText },
   { name: 'المطلوبين', path: '/wanted', icon: AlertTriangle },
   { name: 'صور الشخصيات', path: '/characters', icon: ImageIcon },
+  { name: 'قصص الشخصيات', path: '/stories', icon: BookOpen },
   { name: 'معلومات عامة', path: '/general', icon: Info },
 ];
 
