@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  TableProperties
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
@@ -24,6 +25,7 @@ interface SidebarProps {
 
 const navItems = [
   { name: 'الرئيسية', path: '/', icon: Home },
+  { name: 'الجدول', path: '/schedule', icon: TableProperties },
   { name: 'التحليلات والثريدات', path: '/analytics', icon: BarChart2 },
   { name: 'حسابات أعضاء CIA', path: '/streamers', icon: Users },
   { name: 'القضايا', path: '/cases', icon: FileText },

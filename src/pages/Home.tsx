@@ -1,17 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { BarChart2, Users, FileText, AlertTriangle, Info, Image as ImageIcon } from 'lucide-react';
+import { BarChart2, Users, FileText, AlertTriangle, Info, Image as ImageIcon, TableProperties } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const sections = [
+  {
+    title: 'الجدول',
+    description: 'سجل بيانات وكالة الاستخبارات المركزية.',
+    icon: TableProperties,
+    path: '/schedule',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/10'
+  },
   {
     title: 'التحليلات والثريدات',
     description: 'تحليلات عميقة وشاملة عن قضايا وشخصيات الوكالة.',
     icon: BarChart2,
     path: '/analytics',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10'
+    color: 'text-indigo-400',
+    bg: 'bg-indigo-500/10'
   },
   {
     title: 'حسابات أعضاء CIA',

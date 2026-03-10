@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, FileText, AlertTriangle, Menu, X, BarChart2, Info } from 'lucide-react';
+import { Home, Users, FileText, AlertTriangle, Menu, X, BarChart2, Info, TableProperties } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface BottomNavProps {
@@ -10,6 +10,7 @@ interface BottomNavProps {
 
 const leftNavItems = [
   { name: 'الرئيسية', path: '/', icon: Home },
+  { name: 'الجدول', path: '/schedule', icon: TableProperties },
   { name: 'الستريمرز', path: '/streamers', icon: Users },
   { name: 'القضايا', path: '/cases', icon: FileText },
 ];
